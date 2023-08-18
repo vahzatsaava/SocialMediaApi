@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+
+  postgres-user:
+    container_name: postgres-post
+    image: postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: user
+      POSTGRES_DB: user-post
+      PGDATA: /data/PostTestApi
+    volumes:
+      - postgres:/data/postgres
+    ports:
+      - "5470:5432"
+    restart: unless-stopped
+    networks:
+      - app
+
+volumes:
+  postgres:
+    external: true
+networks:
+  app:
+    driver: bridge
+
+
+
+
+
+
