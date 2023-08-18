@@ -1,0 +1,14 @@
+server:
+  port: 8085
+
+spring:
+  datasource:
+    username: user
+    password: user
+    url: jdbc:postgresql://localhost:5470/user-post
+  jpa:
+    hibernate:
+      ddl-auto: update
+jwt:
+  secret: my-secret-key
+  expiration: 36000
