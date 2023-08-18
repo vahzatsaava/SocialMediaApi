@@ -38,6 +38,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests()
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/api/v1/users/**").hasRole("USER")
+                .requestMatchers(AUTH_SWAGGER_WHITELIST).permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement()
@@ -50,8 +51,20 @@ public class SecurityConfiguration {
         return httpSecurity.build();
     }
 
+    private static final String[] AUTH_SWAGGER_WHITELIST = {
+            "/swagger-resources/**",
+            "/swagger-ui/**",
+            "/swagger-ui.html",
+            "/v3/api-docs/**",
+            "/v3/api-docs",
+            "/webjars/**",
+            "/actuator/prometheus",
+            "api/v1/auth/**",
+            "v2/api-docs"
+    };
+
     @Bean
-    public DaoAuthenticationProvider daoAuthenticationProvider(){
+    public DaoAuthenticationProvider daoAuthenticationProvider() {
         DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
         daoAuthenticationProvider.setPasswordEncoder(passwordEncoder);
         daoAuthenticationProvider.setUserDetailsService(userService);
