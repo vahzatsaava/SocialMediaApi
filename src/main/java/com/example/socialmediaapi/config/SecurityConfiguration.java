@@ -38,6 +38,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests()
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/api/v1/users/**").hasRole("USER")
+                .requestMatchers("/api/v1/posts/**").hasRole("USER")
                 .requestMatchers(AUTH_SWAGGER_WHITELIST).permitAll()
                 .anyRequest().authenticated()
                 .and()

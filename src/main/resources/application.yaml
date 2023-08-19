@@ -11,4 +11,4 @@ spring:
       ddl-auto: update
 jwt:
   secret: my-secret-key
-  expiration: 36000
+  expiration: 360000

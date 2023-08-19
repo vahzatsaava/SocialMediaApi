@@ -3,6 +3,7 @@ package com.example.socialmediaapi.service.impl;
 import com.example.socialmediaapi.dto.auth.CredentialsDto;
 import com.example.socialmediaapi.dto.auth.SignUpDto;
 import com.example.socialmediaapi.dto.UserDto;
+import com.example.socialmediaapi.exceptions.EntityIsPresentException;
 import com.example.socialmediaapi.mapper.UserMapper;
 import com.example.socialmediaapi.model.User;
 import com.example.socialmediaapi.repository.RoleRepository;
@@ -50,7 +51,7 @@ public class UserServiceImpl implements UserService {
     public UserDto register(SignUpDto signUpDto) {
         Optional<User> user = userRepository.findUserByEmail(signUpDto.getEmail());
         if (user.isPresent()){
-            throw new EntityNotFoundException("user is created ");
+            throw new EntityIsPresentException("user was created before");
         }
         log.info("Try to save new user ");
         User newUser = userMapper.signUpToUser(signUpDto);
