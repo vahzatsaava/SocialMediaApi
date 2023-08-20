@@ -6,7 +6,9 @@ import com.example.socialmediaapi.model.User;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {
+        FriendShipMapper.class
+})
 public interface UserMapper {
     UserDto toDto(User user);
 

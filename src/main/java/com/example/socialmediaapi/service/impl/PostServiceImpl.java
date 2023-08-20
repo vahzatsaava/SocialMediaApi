@@ -6,7 +6,6 @@ import com.example.socialmediaapi.mapper.ImageMapper;
 import com.example.socialmediaapi.mapper.PostMapper;
 import com.example.socialmediaapi.mapper.UserMapper;
 import com.example.socialmediaapi.model.Post;
-import com.example.socialmediaapi.model.User;
 import com.example.socialmediaapi.repository.PostRepository;
 import com.example.socialmediaapi.service.PostService;
 import com.example.socialmediaapi.service.UserService;

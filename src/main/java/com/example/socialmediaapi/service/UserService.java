@@ -11,4 +11,5 @@ public interface UserService {
     UserDto register(SignUpDto signUpDto);
     UserDto findUserByUserName(String userName);
     UserDto getUserByEmail(String userEmail);
+    UserDto findById(Long userId);
 }

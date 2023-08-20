@@ -1,10 +1,7 @@
 package com.example.socialmediaapi.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
@@ -28,19 +25,26 @@ public class User {
     private String password;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<Post> posts;
 
     @OneToMany(mappedBy = "senderUser", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<FriendRequest> sentFriendRequests;
 
     @OneToMany(mappedBy = "receiverUser", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<FriendRequest> receivedFriendRequests;
 
     @ManyToMany
-    @JoinTable(name = "user_friends",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "friend_id"))
+    @JoinTable(
+            name = "friendships",
+            joinColumns = @JoinColumn(name = "user1_id"),
+            inverseJoinColumns = @JoinColumn(name = "user2_id")
+    )
+    @ToString.Exclude
     private List<User> friends;
+
 
     @ManyToMany
     @JoinTable(
@@ -49,8 +53,10 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id")
 
     )
+    @ToString.Exclude
     private List<Role> roles;
 
     @OneToMany(mappedBy = "followerUser", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<Subscription> subscriptions;
 }

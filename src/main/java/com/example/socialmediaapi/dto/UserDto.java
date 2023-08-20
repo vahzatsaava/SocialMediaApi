@@ -19,8 +19,5 @@ public class UserDto {
     private String token;
     private String password;
     private List<Role> roles;
-    private List<Long> sentFriendRequestIds;
-    private List<Long> receivedFriendRequestIds;
-    private List<Long> friendIds;
-    private List<Long> subscriptionIds;
+    private List<PostDto> posts;
 }

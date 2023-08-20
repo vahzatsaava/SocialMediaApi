@@ -1,13 +1,20 @@
 package com.example.socialmediaapi.service.impl;
 
+import com.example.socialmediaapi.dto.FriendShipDto;
 import com.example.socialmediaapi.dto.UserDto;
 import com.example.socialmediaapi.exceptions.FriendRequestException;
+import com.example.socialmediaapi.mapper.FriendShipMapper;
+import com.example.socialmediaapi.mapper.SubscriptionMapper;
 import com.example.socialmediaapi.mapper.UserMapper;
 import com.example.socialmediaapi.model.FriendRequest;
+import com.example.socialmediaapi.model.FriendShip;
+import com.example.socialmediaapi.model.Subscription;
+import com.example.socialmediaapi.model.User;
 import com.example.socialmediaapi.model.enums.FriendRequestStatus;
-import com.example.socialmediaapi.model.enums.FriendShipStatus;
 import com.example.socialmediaapi.repository.FriendRequestRepository;
 import com.example.socialmediaapi.service.FriendRequestService;
+import com.example.socialmediaapi.service.FriendShipService;
+import com.example.socialmediaapi.service.SubscriptionService;
 import com.example.socialmediaapi.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
@@ -15,15 +22,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 
 @Service
 @AllArgsConstructor
 @Slf4j
 public class FriendRequestServiceImpl implements FriendRequestService {
     private final FriendRequestRepository friendRequestRepository;
+
     private final UserService userService;
+    private final SubscriptionService subscriptionService;
+    private final FriendShipService friendShipService;
+
     private final UserMapper userMapper;
+    private final FriendShipMapper friendShipMapper;
+    private final SubscriptionMapper subscriptionMapper;
 
     @Override
     @Transactional
@@ -36,26 +48,34 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         if (emailSender == null || emailReceiver == null) {
             throw new NullPointerException("Either sender's email or receiver's email is null.");
         }
-        if (friendRequestRepository.existsBySenderUserEmailAndReceiverUserEmail(emailSender, emailReceiver)) {
+        boolean value = existFriendRequestByStatus(emailSender,emailReceiver);
+        if (value) {
             throw new FriendRequestException("A friend request from this sender to this receiver already exists.");
         }
 
-        UserDto sender = userService.findByEmail(emailSender);
-        UserDto receiver = userService.findByEmail(emailReceiver);
+        log.info("get users by email and map it to dto ");
+        UserDto senderDto = userService.findByEmail(emailSender);
+        UserDto receiverDto = userService.findByEmail(emailReceiver);
+        log.info("asdfsdfsdfsdf");
+
+
+        User sender = userMapper.toEntity(senderDto);
+        User receiver = userMapper.toEntity(receiverDto);
 
 
         FriendRequest friendRequest = new FriendRequest();
-        friendRequest.setReceiverUser(userMapper.toEntity(receiver));
-        friendRequest.setSenderUser(userMapper.toEntity(sender));
+        friendRequest.setReceiverUser(receiver);
+        friendRequest.setSenderUser(sender);
         friendRequest.setStatus(FriendRequestStatus.PENDING);
-        friendRequest.setFriendShipStatusSenderUser(FriendShipStatus.FOLLOWER);
-        friendRequest.setFriendShipStatusReceiverUser(FriendShipStatus.BLOGGER);
-
-        //friendRequest.getSenderUser().setSentFriendRequests(List.of(friendRequest));
 
         log.info("try to save friend request ");
         friendRequestRepository.save(friendRequest);
+
+        log.info("create subscription from sender to user");
+        subscriptionService.save(sender, receiver);
+
     }
+
 
     @Override
     @Transactional
@@ -69,10 +89,21 @@ public class FriendRequestServiceImpl implements FriendRequestService {
                 .orElseThrow(() -> new EntityNotFoundException(" FriendRequest with id " + id + " not found"));
 
         log.info("set to request new parameters ");
-        friendRequestById.setStatus(FriendRequestStatus.ACCEPTED);
-        friendRequestById.setFriendShipStatusReceiverUser(FriendShipStatus.FRIENDS);
-        friendRequestById.setFriendShipStatusSenderUser(FriendShipStatus.FRIENDS);
+        if (friendRequestById.getStatus() == FriendRequestStatus.PENDING) {
+            friendRequestById.setStatus(FriendRequestStatus.ACCEPTED);
+            log.info("subscribe operation to from receiver to sender user");
 
+            Subscription backSubscription = new Subscription();
+            backSubscription.setTargetUser(friendRequestById.getReceiverUser());
+            backSubscription.setFollowerUser(friendRequestById.getSenderUser());
+            subscriptionService.save(backSubscription.getTargetUser(),backSubscription.getFollowerUser());
+
+            log.info("Create friendship between users ");
+            saveFriendship(friendRequestById.getSenderUser(), friendRequestById.getReceiverUser());
+
+        } else {
+            throw new FriendRequestException("Status should be Pending for Accept sender friend request");
+        }
     }
 
     @Override
@@ -90,46 +121,52 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         if (friendRequest.getStatus() == FriendRequestStatus.PENDING) {
             friendRequest.setStatus(FriendRequestStatus.REJECTED);
         } else {
-            throw new FriendRequestException("Status for reject should be PENDING.");
+            throw new FriendRequestException("Status for reject should be PENDING ");
         }
-
     }
 
     @Override
     @Transactional
-    public void changeFriendStatus(String userEmail, Long requestId) {
-        if (userEmail == null) {
+    public void changeFriendStatus(Long subscriptionId, Long requestId,Long friendShipID) {
+        if (subscriptionId == null) {
             throw new NullPointerException("userEmail is Null");
         }
 
         if (requestId == null) {
             throw new NullPointerException("requestId is Null");
         }
+        if (friendShipID == null) {
+            throw new NullPointerException("friendShip is Null");
+        }
 
         FriendRequest friendRequestById = friendRequestRepository
                 .findById(requestId)
                 .orElseThrow(() -> new EntityNotFoundException("FriendRequest with id " + requestId + " is not found"));
 
-        modifyFriendRequestStatuses(friendRequestById, userEmail);
 
-    }
-
-
-    private void modifyFriendRequestStatuses(FriendRequest friendRequest, String userEmail) {
-        if (userEmail.equals(friendRequest.getReceiverUser().getEmail())
-                && (friendRequest.getFriendShipStatusReceiverUser() == FriendShipStatus.FRIENDS)) {
-
-            friendRequest.setFriendShipStatusReceiverUser(FriendShipStatus.BLOGGER);
-            friendRequest.setFriendShipStatusSenderUser(FriendShipStatus.FOLLOWER);
-
-        } else if (userEmail.equals(friendRequest.getSenderUser().getEmail())
-                && (friendRequest.getFriendShipStatusSenderUser() == FriendShipStatus.FRIENDS)) {
-
-            friendRequest.setFriendShipStatusReceiverUser(FriendShipStatus.FOLLOWER);
-            friendRequest.setFriendShipStatusSenderUser(FriendShipStatus.BLOGGER);
+        if (friendRequestById.getStatus() == FriendRequestStatus.ACCEPTED) {
+            friendRequestById.setStatus(FriendRequestStatus.REJECTED);
+            subscriptionService.delete(subscriptionId);
+            friendShipService.delete(friendShipID);
         } else {
-            throw new FriendRequestException("Status is not Friends between users");
+            throw new FriendRequestException("Status should be ACCEPTED for changing ");
         }
     }
 
+    @Override
+    public Boolean existFriendRequestByStatus(String senderEmail,String receiverEmail) {
+
+        return friendRequestRepository.existsFriendRequestBySenderUserEmailAndReceiverUserEmail(senderEmail,receiverEmail);
+    }
+
+
+    private FriendShipDto saveFriendship(User sender, User receiver) {
+
+        FriendShip friendShip = new FriendShip();
+        friendShip.setUser1(sender);
+        friendShip.setUser2(receiver);
+        FriendShipDto friendShipDto = friendShipMapper.toFriendShipDto(friendShip);
+
+        return friendShipService.save(friendShipDto);
+    }
 }

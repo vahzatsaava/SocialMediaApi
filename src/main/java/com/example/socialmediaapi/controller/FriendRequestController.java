@@ -49,13 +49,13 @@ public class FriendRequestController {
         return ResponseEntity.ok(responseDto);
     }
 
-    @PutMapping("/change-friend-status/{id}")
+    @DeleteMapping("/change-friend-status/{requestId}")
     @Operation(summary = "[US 3.4] Change friend status to follower and blogger",
             description = "This API is used to change friend status to follower and blogger.")
-    public ResponseEntity<ResponseDto<String>> deleteFriend(@RequestParam String userEmail, @PathVariable Long id) {
-        friendRequestService.changeFriendStatus(userEmail, id);
+    public ResponseEntity<ResponseDto<String>> deleteFriend(@RequestParam Long subscriptionId, @PathVariable Long requestId, @RequestParam Long friendShipId) {
+        friendRequestService.changeFriendStatus(subscriptionId, requestId,friendShipId);
         ResponseDto<String> responseDto = new ResponseDto<>(HttpStatus.OK.value(),
-                String.format("Friend status was changed by the user with email %s", userEmail));
+                String.format("Friend status was changed by the user with email %s", subscriptionId));
         return ResponseEntity.ok(responseDto);
     }
 }

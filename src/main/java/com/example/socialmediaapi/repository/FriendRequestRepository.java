@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface FriendRequestRepository extends JpaRepository<FriendRequest, Long> {
 
-    boolean existsBySenderUserEmailAndReceiverUserEmail(String senderEmail, String receiverEmail);
+    boolean existsFriendRequestBySenderUserEmailAndReceiverUserEmail(String emailSender,String emailReceiver);
 }

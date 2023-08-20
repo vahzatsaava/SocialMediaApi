@@ -17,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,6 +62,7 @@ public class UserServiceImpl implements UserService {
         newUser.setRoles(List.of(roleRepository.findAllByName("ROLE_USER").get()));
         newUser.setPassword(passwordEncoder.encode(signUpDto.getPassword()));
         User savedUser = userRepository.save(newUser);
+
         return userMapper.toDto(savedUser);
     }
 
@@ -75,11 +77,23 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public UserDto getUserByEmail(String userEmail) {
-        if (userEmail == null){
+        if (userEmail == null) {
             throw new NullPointerException("email is null check email value");
         }
         User user = userRepository.findUserByEmail(userEmail)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email - " + userEmail));
+        return userMapper.toDto(user);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserDto findById(Long userId) {
+        if (userId == null) {
+            throw new NullPointerException("userId is null check email value");
+        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with id - " + userId));
+
         return userMapper.toDto(user);
     }
 

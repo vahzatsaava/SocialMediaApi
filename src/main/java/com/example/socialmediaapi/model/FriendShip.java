@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Friendship     {
+public class FriendShip {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
