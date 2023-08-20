@@ -33,6 +33,9 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public UserDto findByEmail(String email) {
+        if (email == null){
+            throw new NullPointerException("email is null check email value");
+        }
         User user = userRepository.findUserByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
         return userMapper.toDto(user);
@@ -68,5 +71,17 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + userName));
         return userMapper.toDto(user);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserDto getUserByEmail(String userEmail) {
+        if (userEmail == null){
+            throw new NullPointerException("email is null check email value");
+        }
+        User user = userRepository.findUserByEmail(userEmail)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email - " + userEmail));
+        return userMapper.toDto(user);
+    }
+
 
 }

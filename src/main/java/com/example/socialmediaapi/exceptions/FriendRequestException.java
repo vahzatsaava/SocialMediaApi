@@ -4,10 +4,10 @@ import jakarta.persistence.PersistenceException;
 import lombok.Data;
 
 @Data
-public class EntityIsPresentException extends PersistenceException {
-    private final String message;
+public class FriendRequestException extends PersistenceException {
+    private String message;
 
-    public EntityIsPresentException(String message){
+    public FriendRequestException(String message) {
         this.message = message;
     }
 }

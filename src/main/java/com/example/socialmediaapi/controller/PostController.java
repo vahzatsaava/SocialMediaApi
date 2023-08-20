@@ -24,8 +24,8 @@ public class PostController {
     @GetMapping("/by-title")
     @Operation(summary = "[US 2.1] Get post information by title",
             description = "This API is used to get Post info.")
-    public ResponseEntity<ResponseDto<PostDto>> getByTittle(@RequestParam String tittle) {
-        PostDto postDto = postService.getPostByTitle(tittle);
+    public ResponseEntity<ResponseDto<PostDto>> getByTittle(@RequestParam String title) {
+        PostDto postDto = postService.getPostByTitle(title);
         ResponseDto<PostDto> responseDto = new ResponseDto<>(HttpStatus.OK.value(),
                 postDto);
         return ResponseEntity.ok(responseDto);
@@ -54,7 +54,7 @@ public class PostController {
     @DeleteMapping("/delete-post/{id}")
     @Operation(summary = "[US 2.4] Delete post by id",
             description = "This API is used to delete Post.")
-    public ResponseEntity<ResponseDto<String>> updatePost(@PathVariable Long id) {
+    public ResponseEntity<ResponseDto<String>> deletePost(@PathVariable Long id) {
         postService.delete(id);
         ResponseDto<String> responseDto = new ResponseDto<>(HttpStatus.OK.value(),
                 String.format("Post with ID %d was deleted", id));

@@ -8,6 +8,7 @@ import com.example.socialmediaapi.exceptions.AppError;
 import com.example.socialmediaapi.security.JwtTokenProvider;
 import com.example.socialmediaapi.security.UserDetailsServiceImpl;
 import com.example.socialmediaapi.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -35,6 +36,8 @@ public class AuthController {
 
 
     @PostMapping("/login")
+    @Operation(summary = "[US 1.1] Prove our users login ",
+            description = "This API is used to login and authenticate.")
     public ResponseEntity<?> login(@RequestBody CredentialsDto credentialsDto) {
         try {
             manager.authenticate(new UsernamePasswordAuthenticationToken(credentialsDto.getEmail(), credentialsDto.getPassword()));
@@ -48,6 +51,8 @@ public class AuthController {
     }
 
     @PostMapping("/register")
+    @Operation(summary = "[US 1.2] Register new user for api ",
+            description = "This API is used for registration .")
     public ResponseEntity<UserDto> register(@RequestBody SignUpDto signUpDto) {
         UserDto userDto = userService.register(signUpDto);
         return ResponseEntity.created(URI.create("/users/" + userDto.getId()))
