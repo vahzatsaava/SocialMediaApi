@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.constraints.Null;
+
 @Service
 @AllArgsConstructor
 @Slf4j
@@ -42,4 +44,19 @@ public class FriendShipServiceImpl implements FriendShipService {
 
         friendShipRepository.delete(friendShip);
     }
+
+    @Override
+    public Boolean isFriends(String emailUser1, String emailUser2) {
+        if (emailUser1 == null){
+            throw new NullPointerException("emailUser1 is null");
+        }
+        if (emailUser2 == null){
+            throw new NullPointerException("emailUser2  is null");
+        }
+        boolean fromUser1ToUser2 = friendShipRepository.existsFriendShipByUser1EmailAndUser2Email(emailUser1,emailUser2);
+        boolean fromUser2ToUser1 = friendShipRepository.existsFriendShipByUser1EmailAndUser2Email(emailUser2,emailUser1);
+        return fromUser2ToUser1 || fromUser1ToUser2;
+    }
+
+
 }

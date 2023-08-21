@@ -59,4 +59,13 @@ public class User {
     @OneToMany(mappedBy = "followerUser", cascade = CascadeType.ALL)
     @ToString.Exclude
     private List<Subscription> subscriptions;
+
+
+    @OneToMany(mappedBy = "senderUser", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private List<Message> sentMessages;
+
+    @OneToMany(mappedBy = "receiverUser", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private List<Message> receivedMessages;
 }

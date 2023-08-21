@@ -35,7 +35,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public UserDto findByEmail(String email) {
         if (email == null){
-            throw new NullPointerException("email is null check email value");
+            throw new NullPointerException("email is null check email value ");
         }
         User user = userRepository.findUserByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
@@ -45,6 +45,9 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public UserDto login(CredentialsDto credentialsDto) {
+        if (credentialsDto == null){
+            throw new NullPointerException("credentialsDto is null check credentialsDto value");
+        }
         User user = userRepository.findUserByEmail(credentialsDto.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + credentialsDto.getEmail()));
             return userMapper.toDto(user);
@@ -53,6 +56,9 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDto register(SignUpDto signUpDto) {
+        if (signUpDto == null){
+            throw new NullPointerException("signUpDto is null check signUpDto value");
+        }
         Optional<User> user = userRepository.findUserByEmail(signUpDto.getEmail());
         if (user.isPresent()){
             throw new EntityIsPresentException("user was created before");
@@ -69,6 +75,9 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public UserDto findUserByUserName(String userName) {
+        if (userName == null) {
+            throw new NullPointerException("email is null check email value");
+        }
         User user = userRepository.findUserByUsername(userName)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + userName));
         return userMapper.toDto(user);

@@ -16,7 +16,6 @@ public class UserDto {
     private Long id;
     private String username;
     private String email;
-    private String token;
     private String password;
     private List<Role> roles;
     private List<PostDto> posts;
