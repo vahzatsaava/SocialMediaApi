@@ -10,4 +10,6 @@ public interface UserService {
     UserDto login(CredentialsDto credentialsDto);
     UserDto register(SignUpDto signUpDto);
     UserDto findUserByUserName(String userName);
+    UserDto getUserByEmail(String userEmail);
+    UserDto findById(Long userId);
 }

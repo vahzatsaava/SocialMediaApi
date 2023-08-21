@@ -6,7 +6,6 @@ import com.example.socialmediaapi.mapper.ImageMapper;
 import com.example.socialmediaapi.mapper.PostMapper;
 import com.example.socialmediaapi.mapper.UserMapper;
 import com.example.socialmediaapi.model.Post;
-import com.example.socialmediaapi.model.User;
 import com.example.socialmediaapi.repository.PostRepository;
 import com.example.socialmediaapi.service.PostService;
 import com.example.socialmediaapi.service.UserService;
@@ -14,6 +13,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
@@ -28,6 +28,7 @@ public class PostServiceImpl implements PostService {
     private final UserMapper userMapper;
 
     @Override
+    @Transactional
     public PostDto createPost(PostDto postDto, String email) {
         if (postDto == null){
             throw new NullPointerException("PostDto is null please check your input if you want to save Post");
@@ -45,6 +46,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
     public PostDto updatePost(PostDto postDto, Long postId) {
         log.info("try to find post by id ");
         Post postById = postRepository.findById(postId)
@@ -59,6 +61,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PostDto getPostByTitle(String title) {
         log.info("try to find post by title ");
         Post post = postRepository.findByTitle(title)
@@ -68,6 +71,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Post with id " + id + " not found"));
