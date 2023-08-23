@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -19,8 +20,13 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "title",unique = true)
     private String title;
+
+    @Column(name = "text",unique = true)
     private String text;
+
+    private LocalDateTime timestamp;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

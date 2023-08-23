@@ -6,5 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface FriendShipRepository extends JpaRepository<FriendShip,Long> {
+    void deleteByUser1EmailOrUser2Email(String senderUserEmail, String userToDeleteEmail);
     boolean existsFriendShipByUser1EmailAndUser2Email(String emailUser1,String emailUser2);
 }

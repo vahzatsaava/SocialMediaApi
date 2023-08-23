@@ -8,4 +8,8 @@ import org.springframework.stereotype.Repository;
 public interface FriendRequestRepository extends JpaRepository<FriendRequest, Long> {
 
     boolean existsFriendRequestBySenderUserEmailAndReceiverUserEmail(String emailSender,String emailReceiver);
+
+    void deleteBySenderUserEmailOrReceiverUserEmail(String senderUserEmail, String userToDeleteEmail);
+
+    FriendRequest findBySenderUserEmailAndReceiverUserEmail(String senderUserEmail, String userToDeleteEmail);
 }
