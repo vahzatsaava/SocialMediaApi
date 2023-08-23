@@ -1,5 +1,6 @@
 package com.example.socialmediaapi.model;
 
+import com.example.socialmediaapi.model.enums.ActivityReadStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,5 +28,8 @@ public class ActivityFeed {
     @JoinColumn(name = "post_id")
     private Post post;
 
-    private LocalDateTime timestamp;
+    @Enumerated(EnumType.STRING)
+    private ActivityReadStatus activityReadStatus;
+
+    private LocalDateTime statusChanged;
 }

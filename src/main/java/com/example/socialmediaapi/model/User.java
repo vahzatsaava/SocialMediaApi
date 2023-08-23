@@ -60,6 +60,10 @@ public class User {
     @ToString.Exclude
     private List<Subscription> subscriptions;
 
+    @OneToMany(mappedBy = "targetUser", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private List<Subscription> targetSubscriptions;
+
 
     @OneToMany(mappedBy = "senderUser", cascade = CascadeType.ALL)
     @ToString.Exclude

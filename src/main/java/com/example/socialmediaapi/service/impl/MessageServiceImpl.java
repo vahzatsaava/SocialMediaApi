@@ -36,13 +36,13 @@ public class MessageServiceImpl implements MessageService {
     @Transactional
     public void sendMessage(String senderEmail, String receiverEmail, String content) {
         if (senderEmail == null) {
-            throw new MessageSendException("sendEmail is null");
+            throw new IllegalArgumentException ("sendEmail is null");
         }
         if (receiverEmail == null) {
-            throw new MessageSendException("receiverEmail is null");
+            throw new IllegalArgumentException ("receiverEmail is null");
         }
         if (content == null) {
-            throw new MessageSendException("content is null");
+            throw new IllegalArgumentException ("content is null");
         }
         if (Boolean.FALSE.equals(friendShipService.isFriends(senderEmail, receiverEmail))) {
             throw new MessageSendException("Users with emails " + senderEmail + " and " + receiverEmail + " are not friends");
@@ -64,13 +64,13 @@ public class MessageServiceImpl implements MessageService {
     @Transactional(readOnly = true)
     public List<ContentChatFriendsDto> getChatBetweenUsers(String emailSender, String emailReceiver) {
         if (emailSender == null) {
-            throw new MessageSendException("emailSender is null");
+            throw new IllegalArgumentException ("emailSender is null");
         }
         if (emailReceiver == null) {
-            throw new MessageSendException("emailReceiver is null");
+            throw new IllegalArgumentException ("emailReceiver is null");
         }
         if (Boolean.FALSE.equals(friendShipService.isFriends(emailSender, emailReceiver))) {
-            throw new MessageSendException("Users with emails " + emailSender + " and " + emailReceiver + " are not friends");
+            throw new IllegalArgumentException ("Users with emails " + emailSender + " and " + emailReceiver + " are not friends");
         }
 
         UserDto userDtoSender = userService.findByEmail(emailSender);

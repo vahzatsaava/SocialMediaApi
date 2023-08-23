@@ -8,4 +8,6 @@ public interface FriendShipService {
     void delete(Long id);
 
     Boolean isFriends(String emailUser1,String emailUser2);
+
+    void deleteFromFriendsByEmails(String senderUserEmail, String userToDeleteEmail);
 }

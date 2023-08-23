@@ -7,7 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring", uses = {
-        FriendShipMapper.class
+        FriendShipMapper.class,SubscriptionMapper.class
 })
 public interface UserMapper {
     UserDto toDto(User user);

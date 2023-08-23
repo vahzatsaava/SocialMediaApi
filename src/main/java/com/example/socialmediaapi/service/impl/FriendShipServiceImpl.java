@@ -24,7 +24,7 @@ public class FriendShipServiceImpl implements FriendShipService {
     @Transactional
     public FriendShipDto save(FriendShipDto friendship) {
         if (friendship == null){
-            throw new NullPointerException("this friendship values is null" );
+            throw new IllegalArgumentException ("this friendship values is null" );
         }
         log.info("try to save friendship");
         FriendShip savedFriendShip = friendShipRepository.save(friendShipMapper.toFriendShipEntity(friendship));
@@ -36,7 +36,7 @@ public class FriendShipServiceImpl implements FriendShipService {
     @Transactional
     public void delete(Long id) {
         if (id == null){
-            throw new NullPointerException("we cannot delete friendship because: id is null" );
+            throw new IllegalArgumentException ("we cannot delete friendship because: id is null" );
         }
         FriendShip friendShip = friendShipRepository
                 .findById(id)
@@ -46,17 +46,29 @@ public class FriendShipServiceImpl implements FriendShipService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Boolean isFriends(String emailUser1, String emailUser2) {
         if (emailUser1 == null){
-            throw new NullPointerException("emailUser1 is null");
+            throw new IllegalArgumentException ("emailUser1 is null");
         }
         if (emailUser2 == null){
-            throw new NullPointerException("emailUser2  is null");
+            throw new IllegalArgumentException ("emailUser2  is null");
         }
         boolean fromUser1ToUser2 = friendShipRepository.existsFriendShipByUser1EmailAndUser2Email(emailUser1,emailUser2);
         boolean fromUser2ToUser1 = friendShipRepository.existsFriendShipByUser1EmailAndUser2Email(emailUser2,emailUser1);
         return fromUser2ToUser1 || fromUser1ToUser2;
     }
 
-
+    @Override
+    @Transactional
+    public void deleteFromFriendsByEmails(String senderUserEmail, String userToDeleteEmail) {
+        if (senderUserEmail == null){
+            throw new IllegalArgumentException ("senderUserEmail is null");
+        }
+        if (userToDeleteEmail == null){
+            throw new IllegalArgumentException ("userToDeleteEmail  is null");
+        }
+        friendShipRepository.deleteByUser1EmailOrUser2Email(senderUserEmail,userToDeleteEmail);
+        friendShipRepository.deleteByUser1EmailOrUser2Email(userToDeleteEmail,senderUserEmail);
+    }
 }

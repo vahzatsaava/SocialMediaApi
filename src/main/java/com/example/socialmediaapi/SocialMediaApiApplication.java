@@ -14,7 +14,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
         info = @Info(
                 title = "Social Media Application",
                 version = "1.1.0",
-                description = "This is a Test Media Application",
+                description = "This is a Test Media Application." +
+                        "To register, send a POST request to /register with a JSON body containing valid username, email, and password.\n" +
+                        "Then, use the registered credentials to log in by sending a POST request to /login and receiving a JWT token.\n" +
+                        "Add the obtained JWT token to the 'Authorize' button at the top right corner.",
                 contact = @Contact(
                         name = "Vazha Tsaava",
                         email = "vazhatsaava@gmail.com"

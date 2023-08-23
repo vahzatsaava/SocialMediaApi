@@ -1,6 +1,6 @@
 package com.example.socialmediaapi.controller;
 
-import com.example.socialmediaapi.dto.auth.CredentialsDto;
+
 import com.example.socialmediaapi.dto.auth.JwtResponse;
 import com.example.socialmediaapi.dto.auth.SignUpDto;
 import com.example.socialmediaapi.dto.UserDto;
@@ -9,6 +9,7 @@ import com.example.socialmediaapi.security.JwtTokenProvider;
 import com.example.socialmediaapi.security.UserDetailsServiceImpl;
 import com.example.socialmediaapi.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -38,14 +39,14 @@ public class AuthController {
     @PostMapping("/login")
     @Operation(summary = "[US 1.1] Prove our users login ",
             description = "This API is used to login and authenticate.")
-    public ResponseEntity<?> login(@RequestBody CredentialsDto credentialsDto) {
+    public ResponseEntity<?> login(@RequestBody @Valid SignUpDto signUpDto) {
         try {
-            manager.authenticate(new UsernamePasswordAuthenticationToken(credentialsDto.getEmail(), credentialsDto.getPassword()));
+            manager.authenticate(new UsernamePasswordAuthenticationToken(signUpDto.getEmail(), signUpDto.getPassword()));
         } catch (BadCredentialsException e) {
             return new ResponseEntity<>(new AppError(HttpStatus.UNAUTHORIZED.value(), "password or login is not correct"), HttpStatus.UNAUTHORIZED);
         }
 
-        UserDetails loadUserByUsername = userDetails.loadUserByUsername(credentialsDto.getEmail());
+        UserDetails loadUserByUsername = userDetails.loadUserByUsername(signUpDto.getEmail());
         String token = tokenProvider.generateToken(loadUserByUsername);
         return ResponseEntity.ok(new JwtResponse(token));
     }
@@ -53,7 +54,7 @@ public class AuthController {
     @PostMapping("/register")
     @Operation(summary = "[US 1.2] Register new user for api ",
             description = "This API is used for registration .")
-    public ResponseEntity<UserDto> register(@RequestBody SignUpDto signUpDto) {
+    public ResponseEntity<UserDto> register(@Valid @RequestBody  SignUpDto signUpDto) {
         UserDto userDto = userService.register(signUpDto);
         return ResponseEntity.created(URI.create("/users/" + userDto.getId()))
                 .body(userDto);
