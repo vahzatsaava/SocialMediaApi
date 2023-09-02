@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.Principal;
 import java.util.List;
 
 
@@ -30,11 +31,11 @@ public class ActivityFeedController {
     @GetMapping("/activity")
     @Operation(summary = "[US 5.1] Follower Can Watch Target's Posts",
             description = "This API is used to add ability to watch and sort all target's posts. By ASС and DESC")
-    public ResponseEntity<ResponseDto<List<ActivityFeedDto>>> get(@RequestParam String email,
+    public ResponseEntity<ResponseDto<List<ActivityFeedDto>>> get(Principal principal,
                                                                   @RequestParam(required = false, defaultValue = "DESC") String sortOrder) {
         Sort.Direction direction = sortOrder.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC;
 
-        List<ActivityFeedDto> activityFeedDto = activityFeedService.getActivityFeedsByUserEmail(email, direction);
+        List<ActivityFeedDto> activityFeedDto = activityFeedService.getActivityFeedsByUserEmail(principal, direction);
         ResponseDto<List<ActivityFeedDto>> responseDto = new ResponseDto<>(HttpStatus.OK.value(), activityFeedDto);
         return ResponseEntity.ok(responseDto);
     }

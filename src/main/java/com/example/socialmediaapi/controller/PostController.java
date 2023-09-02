@@ -36,8 +36,8 @@ public class PostController {
     public ResponseEntity<ResponseDto<PostDto>> createPost(@RequestParam @Valid @Size(min = 3) String title,
                                                            @RequestParam String text,
                                                            @RequestParam(required = false) MultipartFile image,
-                                                           @RequestParam String email) {
-        PostDto postDto = postService.createPost(title, text, image, email);
+                                                           Principal principal) {
+        PostDto postDto = postService.createPost(title, text, image, principal);
         ResponseDto<PostDto> responseDto = new ResponseDto<>(HttpStatus.OK.value(),
                 postDto);
         return ResponseEntity.ok(responseDto);
