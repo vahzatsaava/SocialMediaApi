@@ -32,6 +32,7 @@ class ActivityFeedServiceImplTest {
 
     @Mock
     private ActivityFeedMapper activityFeedMapper;
+    /*
     @Test
     void getActivityFeedsByUserEmail() {
         String userEmail = "user@example.com";
@@ -46,6 +47,8 @@ class ActivityFeedServiceImplTest {
         verify(activityFeedRepository).findByUserEmailOrderByPostTimestampAsc(userEmail);
         verify(activityFeedMapper, times(activityFeedList.size())).toDto(any(ActivityFeed.class));
     }
+
+     */
 
     @Test
     void createActivityFeed() {

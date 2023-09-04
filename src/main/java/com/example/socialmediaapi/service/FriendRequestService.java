@@ -1,14 +1,15 @@
 package com.example.socialmediaapi.service;
 
 
+import java.security.Principal;
 
 public interface FriendRequestService {
 
-    void sendFriendRequestAndSubscribe(String emailSender, String emailReceiver);
+    void sendFriendRequestAndSubscribe(Principal principal, String emailReceiver);
 
     void acceptFriendRequest(Long id);
 
-    void deleteFromFriends(String senderUserEmail, String userToDeleteEmail);
+    void deleteFromFriends(Principal principal, String userToDeleteEmail);
 
     void rejectFriendRequest(Long id);
 

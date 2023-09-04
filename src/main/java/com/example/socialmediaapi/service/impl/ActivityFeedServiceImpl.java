@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -29,19 +30,17 @@ public class ActivityFeedServiceImpl implements ActivityFeedService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ActivityFeedDto> getActivityFeedsByUserEmail(String userEmail, Sort.Direction sortOrder) {
-        if (userEmail == null) {
-            throw new IllegalArgumentException ("userEmail is null in getActivityFeed method");
-        }
+    public List<ActivityFeedDto> getActivityFeedsByUserEmail(Principal principal, Sort.Direction sortOrder) {
+
         if (sortOrder == null) {
             throw new IllegalArgumentException ("sortOrder is null getActivityFeed method");
 
         }
         List<ActivityFeed> activityFeeds;
         if (sortOrder == Sort.Direction.ASC) {
-            activityFeeds = activityFeedRepository.findByUserEmailOrderByPostTimestampAsc(userEmail);
+            activityFeeds = activityFeedRepository.findByUserEmailOrderByPostTimestampAsc(principal.getName());
         } else {
-            activityFeeds = activityFeedRepository.findByUserEmailOrderByPostTimestampDesc(userEmail);
+            activityFeeds = activityFeedRepository.findByUserEmailOrderByPostTimestampDesc(principal.getName());
         }
         return activityFeeds.stream()
                 .map(activityFeedMapper::toDto)

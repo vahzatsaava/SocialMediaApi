@@ -5,10 +5,11 @@ import com.example.socialmediaapi.dto.PostDto;
 import com.example.socialmediaapi.dto.content.UserActivityFeedDto;
 import org.springframework.data.domain.Sort;
 
+import java.security.Principal;
 import java.util.List;
 
 public interface ActivityFeedService {
-    List<ActivityFeedDto> getActivityFeedsByUserEmail(String email, Sort.Direction sortOrder);
+    List<ActivityFeedDto> getActivityFeedsByUserEmail(Principal principal, Sort.Direction sortOrder);
 
     ActivityFeedDto createActivityFeed(UserActivityFeedDto userActivityFeedDto, PostDto postDto);
 

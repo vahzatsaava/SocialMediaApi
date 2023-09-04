@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -34,21 +35,19 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional
-    public void sendMessage(String senderEmail, String receiverEmail, String content) {
-        if (senderEmail == null) {
-            throw new IllegalArgumentException ("sendEmail is null");
-        }
+    public void sendMessage(Principal principalSenderEmail, String receiverEmail, String content) {
+
         if (receiverEmail == null) {
             throw new IllegalArgumentException ("receiverEmail is null");
         }
         if (content == null) {
             throw new IllegalArgumentException ("content is null");
         }
-        if (Boolean.FALSE.equals(friendShipService.isFriends(senderEmail, receiverEmail))) {
-            throw new MessageSendException("Users with emails " + senderEmail + " and " + receiverEmail + " are not friends");
+        if (Boolean.FALSE.equals(friendShipService.isFriends(principalSenderEmail.getName(), receiverEmail))) {
+            throw new MessageSendException("Users with emails " + principalSenderEmail + " and " + receiverEmail + " are not friends");
         }
 
-        UserDto senderUser = userService.findByEmail(senderEmail);
+        UserDto senderUser = userService.findByEmail(principalSenderEmail.getName());
         UserDto receiverUser = userService.findByEmail(receiverEmail);
 
         Message message = new Message();
@@ -62,18 +61,16 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ContentChatFriendsDto> getChatBetweenUsers(String emailSender, String emailReceiver) {
-        if (emailSender == null) {
-            throw new IllegalArgumentException ("emailSender is null");
-        }
+    public List<ContentChatFriendsDto> getChatBetweenUsers(Principal principal, String emailReceiver) {
+
         if (emailReceiver == null) {
             throw new IllegalArgumentException ("emailReceiver is null");
         }
-        if (Boolean.FALSE.equals(friendShipService.isFriends(emailSender, emailReceiver))) {
-            throw new IllegalArgumentException ("Users with emails " + emailSender + " and " + emailReceiver + " are not friends");
+        if (Boolean.FALSE.equals(friendShipService.isFriends(principal.getName(), emailReceiver))) {
+            throw new IllegalArgumentException ("Users with emails " + principal.getName() + " and " + emailReceiver + " are not friends");
         }
 
-        UserDto userDtoSender = userService.findByEmail(emailSender);
+        UserDto userDtoSender = userService.findByEmail(principal.getName());
         UserDto userDtoReceiver = userService.findByEmail(emailReceiver);
 
         User userSender = userMapper.toEntity(userDtoSender);

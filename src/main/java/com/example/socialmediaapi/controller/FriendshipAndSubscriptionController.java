@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+
 @RestController
 @RequestMapping("/api/v1/friends")
 @AllArgsConstructor
@@ -24,11 +26,11 @@ public class FriendshipAndSubscriptionController {
     @PostMapping("/send-request")
     @Operation(summary = "[US 3.1] Send a friend request to a user",
             description = "This API is used to send friend requests.")
-    public ResponseEntity<ResponseDto<String>> sendFriendRequest(@RequestParam @Size(min = 8) @Email String emailSender,
+    public ResponseEntity<ResponseDto<String>> sendFriendRequest(Principal principal,
                                                                  @RequestParam @Size(min = 8) @Email String emailReceiver) {
-        friendRequestService.sendFriendRequestAndSubscribe(emailSender, emailReceiver);
+        friendRequestService.sendFriendRequestAndSubscribe(principal, emailReceiver);
         ResponseDto<String> responseDto = new ResponseDto<>(HttpStatus.OK.value(),
-                String.format("User with email %s successfully sent a friend request to the user with email %s", emailSender, emailReceiver));
+                String.format("User with email %s successfully sent a friend request to the user with email %s", principal.getName(), emailReceiver));
         return ResponseEntity.ok(responseDto);
     }
 
@@ -56,11 +58,11 @@ public class FriendshipAndSubscriptionController {
     @Operation(summary = "[US 3.4] Unfollow and Remove Friend",
             description = "This API allows a user to unfollow and remove another user from their friends list. " +
                     "As a result, the user will no longer receive posts from the removed friend in their feed.")
-    public ResponseEntity<ResponseDto<String>> deleteFriend(@RequestParam @Size(min = 8) @Email String senderUser,
+    public ResponseEntity<ResponseDto<String>> deleteFriend(Principal principal,
                                                             @PathVariable @Size(min = 8) @Email String userToDelete) {
-        friendRequestService.deleteFromFriends(senderUser, userToDelete);
+        friendRequestService.deleteFromFriends(principal, userToDelete);
         ResponseDto<String> responseDto = new ResponseDto<>(HttpStatus.OK.value(),
-                String.format("Friend status was changed by the user with email %s", senderUser));
+                String.format("Friend status was changed by the user with email %s", principal));
         return ResponseEntity.ok(responseDto);
     }
 }

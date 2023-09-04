@@ -48,12 +48,12 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public PostDto createPost(String title, String text, MultipartFile image, String emailTargetUser) {
+    public PostDto createPost(String title, String text, MultipartFile image, Principal emailTargetUser) {
         if (title == null || emailTargetUser == null || text == null || image == null) {
             throw new IllegalArgumentException("One or more required fields are null");
         }
 
-        UserDto userTarget = userService.findByEmail(emailTargetUser);
+        UserDto userTarget = userService.findByEmail(emailTargetUser.getName());
         Image imageEntity = imageService.saveImage(image);
 
         Post post = createPostEntity(userTarget, title, text, imageEntity);
@@ -61,7 +61,7 @@ public class PostServiceImpl implements PostService {
 
         imageEntity.setPost(postSaved);
 
-        createActivityFeeds(emailTargetUser, postSaved);
+        createActivityFeeds(emailTargetUser.getName(), postSaved);
 
         return postMapper.toDto(postSaved);
     }

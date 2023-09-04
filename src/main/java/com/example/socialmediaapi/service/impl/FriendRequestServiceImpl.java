@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.Principal;
 import java.util.List;
 
 
@@ -36,20 +37,20 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
     @Override
     @Transactional
-    public void sendFriendRequestAndSubscribe(String emailSender, String emailReceiver) {
+    public void sendFriendRequestAndSubscribe(Principal principal, String emailReceiver) {
 
-        if (emailSender == null || emailReceiver == null) {
+        if (emailReceiver == null) {
             throw new IllegalArgumentException("Either sender's email or receiver's email is null.");
         }
         log.info("find our sender and receiver users by email ");
-        if (emailReceiver.equals(emailSender)) {
+        if (emailReceiver.equals(principal.getName())) {
             throw new IllegalArgumentException("Sender's email and receiver's email are the same. A user cannot send a friend request to themselves.");
         }
 
-        validateNoExistingFriendRequest(emailSender, emailReceiver);
+        validateNoExistingFriendRequest(principal.getName(), emailReceiver);
 
         log.info("get users by email and map it to dto ");
-        UserDto senderDto = userService.findByEmail(emailSender);
+        UserDto senderDto = userService.findByEmail(principal.getName());
         UserDto receiverDto = userService.findByEmail(emailReceiver);
 
         User sender = userMapper.toEntity(senderDto);
@@ -126,22 +127,19 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
     @Override
     @Transactional
-    public void deleteFromFriends(String senderUserEmail, String userToDeleteEmail) {
-        if (senderUserEmail == null) {
-            throw new IllegalArgumentException("userEmail is Null");
-        }
+    public void deleteFromFriends(Principal principal, String userToDeleteEmail) {
 
         if (userToDeleteEmail == null) {
             throw new IllegalArgumentException("requestId is Null");
         }
         FriendRequest friendRequest =
-                friendRequestRepository.findBySenderUserEmailAndReceiverUserEmail(senderUserEmail, userToDeleteEmail);
+                friendRequestRepository.findBySenderUserEmailAndReceiverUserEmail(principal.getName(), userToDeleteEmail);
         User sender = friendRequest.getSenderUser();
 
-        if (existFriendRequestByStatus(senderUserEmail, userToDeleteEmail) || existFriendRequestByStatus(userToDeleteEmail, senderUserEmail)) {
-            friendRequestRepository.deleteBySenderUserEmailOrReceiverUserEmail(senderUserEmail, userToDeleteEmail);
-            subscriptionService.deleteByFollowerAndTargetEmails(senderUserEmail, userToDeleteEmail);
-            friendShipService.deleteFromFriendsByEmails(senderUserEmail, userToDeleteEmail);
+        if (existFriendRequestByStatus(principal.getName(), userToDeleteEmail) || existFriendRequestByStatus(userToDeleteEmail, principal.getName())) {
+            friendRequestRepository.deleteBySenderUserEmailOrReceiverUserEmail(principal.getName(), userToDeleteEmail);
+            subscriptionService.deleteByFollowerAndTargetEmails(principal.getName(), userToDeleteEmail);
+            friendShipService.deleteFromFriendsByEmails(principal.getName(), userToDeleteEmail);
             activityFeedService.unsubscribeFromUser(sender.getId());
         } else {
             throw new FriendRequestException("Status should be ACCEPTED for changing ");
