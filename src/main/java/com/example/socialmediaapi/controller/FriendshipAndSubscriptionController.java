@@ -34,23 +34,23 @@ public class FriendshipAndSubscriptionController {
         return ResponseEntity.ok(responseDto);
     }
 
-    @PostMapping("/accept-request/{id}")
+    @PostMapping("/accept-request/{senderRequestUser}")
     @Operation(summary = "[US 3.2] Accept a friend request from another user",
             description = "This API is used to accept user friend requests.")
-    public ResponseEntity<ResponseDto<String>> acceptFriendRequest(@PathVariable Long id) {
-        friendRequestService.acceptFriendRequest(id);
+    public ResponseEntity<ResponseDto<String>> acceptFriendRequest(@PathVariable String senderRequestUser, Principal principal) {
+        friendRequestService.acceptFriendRequest(senderRequestUser,principal);
         ResponseDto<String> responseDto = new ResponseDto<>(HttpStatus.OK.value(),
-                String.format("User with id - %s was successfully accepted the friend request", id));
+                String.format("User with email - %s was successfully accepted the friend request",senderRequestUser));
         return ResponseEntity.ok(responseDto);
     }
 
-    @PutMapping("/reject-request/{id}")
+    @PutMapping("/reject-request/{senderRequestUser}")
     @Operation(summary = "[US 3.3] Reject a friend request from another user",
             description = "This API is used to reject user friend requests.")
-    public ResponseEntity<ResponseDto<String>> rejectFriendRequest(@PathVariable Long id) {
-        friendRequestService.rejectFriendRequest(id);
+    public ResponseEntity<ResponseDto<String>> rejectFriendRequest(@PathVariable String senderRequestUser, Principal principal) {
+        friendRequestService.rejectFriendRequest(senderRequestUser,principal);
         ResponseDto<String> responseDto = new ResponseDto<>(HttpStatus.OK.value(),
-                String.format("User with ID %s has rejected the friend request", id));
+                String.format("User with email %s has rejected the friend request", senderRequestUser));
         return ResponseEntity.ok(responseDto);
     }
 

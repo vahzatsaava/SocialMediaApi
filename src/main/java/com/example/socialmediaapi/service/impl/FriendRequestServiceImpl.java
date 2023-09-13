@@ -8,7 +8,6 @@ import com.example.socialmediaapi.model.*;
 import com.example.socialmediaapi.model.enums.FriendRequestStatus;
 import com.example.socialmediaapi.repository.FriendRequestRepository;
 import com.example.socialmediaapi.service.*;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -38,34 +37,22 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     @Override
     @Transactional
     public void sendFriendRequestAndSubscribe(Principal principal, String emailReceiver) {
-
-        if (emailReceiver == null) {
-            throw new IllegalArgumentException("Either sender's email or receiver's email is null.");
-        }
-        log.info("find our sender and receiver users by email ");
-        if (emailReceiver.equals(principal.getName())) {
-            throw new IllegalArgumentException("Sender's email and receiver's email are the same. A user cannot send a friend request to themselves.");
-        }
+        checkArgumentsNotNull(emailReceiver,principal);
 
         validateNoExistingFriendRequest(principal.getName(), emailReceiver);
 
-        log.info("get users by email and map it to dto ");
         UserDto senderDto = userService.findByEmail(principal.getName());
         UserDto receiverDto = userService.findByEmail(emailReceiver);
 
         User sender = userMapper.toEntity(senderDto);
         User receiver = userMapper.toEntity(receiverDto);
 
-
-        log.info("try to save friend request ");
         saveFriendRequest(sender,receiver);
 
-        log.info("create subscription from sender to user");
         subscriptionService.save(sender, receiver);
 
         List<Post> posts = receiver.getPosts();
         for (Post post : posts) {
-            log.info("add ability follower user watch posts");
             activityFeedService.createActivityFeed(userActivityFeedMapper.toDto(sender), postMapper.toDto(post));
         }
 
@@ -74,31 +61,25 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
     @Override
     @Transactional
-    public void acceptFriendRequest(Long id) {
-        if (id == null) {
-            throw new IllegalArgumentException("this id value for friendRequest us null ");
-        }
-        log.info("find our request by id ");
-        FriendRequest friendRequestById = findFriendRequestById(id);
+    public void acceptFriendRequest(String senderRequestUser, Principal principal) {
+        checkArgumentsNotNull(senderRequestUser,principal);
+
+        FriendRequest friendRequestById = getFriendRequest(senderRequestUser,principal.getName());
 
         User sender = friendRequestById.getSenderUser();
         User receiver = friendRequestById.getReceiverUser();
 
-        log.info("set to request new parameters ");
         if (friendRequestById.getStatus() == FriendRequestStatus.PENDING) {
             friendRequestById.setStatus(FriendRequestStatus.ACCEPTED);
 
-            log.info("subscribe operation to from receiver to sender user");
             subscriptionService.save(receiver, sender);
 
-            log.info("Create friendship between users ");
             saveFriendship(sender, receiver);
 
             saveAcceptedFriendRequest(sender, receiver);
 
             List<Post> posts = sender.getPosts();
             for (Post post : posts) {
-                log.info("add ability to target user watch posts follower users");
                 activityFeedService.createActivityFeed(userActivityFeedMapper.toDto(receiver), postMapper.toDto(post));
             }
         } else {
@@ -108,16 +89,11 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
     @Override
     @Transactional
-    public void rejectFriendRequest(Long id) {
-        if (id == null) {
-            throw new IllegalArgumentException("this id value for friendRequest us null ");
-        }
-        log.info("find our request by id");
-        FriendRequest friendRequest = friendRequestRepository
-                .findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("FriendRequest with id " + id + " not found"));
+    public void rejectFriendRequest(String senderRequestUser, Principal principal) {
+        checkArgumentsNotNull(senderRequestUser,principal);
 
-        log.info("set to request new parameters ");
+        FriendRequest friendRequest = getFriendRequest(senderRequestUser,principal.getName());
+
         if (friendRequest.getStatus() == FriendRequestStatus.PENDING) {
             friendRequest.setStatus(FriendRequestStatus.REJECTED);
         } else {
@@ -128,12 +104,10 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     @Override
     @Transactional
     public void deleteFromFriends(Principal principal, String userToDeleteEmail) {
+        checkArgumentsNotNull(userToDeleteEmail,principal);
 
-        if (userToDeleteEmail == null) {
-            throw new IllegalArgumentException("requestId is Null");
-        }
-        FriendRequest friendRequest =
-                friendRequestRepository.findBySenderUserEmailAndReceiverUserEmail(principal.getName(), userToDeleteEmail);
+        FriendRequest friendRequest = getFriendRequest(principal.getName(),userToDeleteEmail);
+
         User sender = friendRequest.getSenderUser();
 
         if (existFriendRequestByStatus(principal.getName(), userToDeleteEmail) || existFriendRequestByStatus(userToDeleteEmail, principal.getName())) {
@@ -147,15 +121,17 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Boolean existFriendRequestByStatus(String senderEmail, String receiverEmail) {
 
         return friendRequestRepository.existsFriendRequestBySenderUserEmailAndReceiverUserEmail(senderEmail, receiverEmail);
     }
 
-    private FriendRequest findFriendRequestById(Long id) {
-        return friendRequestRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("FriendRequest with ID " + id + " not found"));
+    private FriendRequest getFriendRequest(String senderUser, String receiverUser){
+        return friendRequestRepository.findBySenderUserEmailAndReceiverUserEmail(senderUser, receiverUser)
+                .orElseThrow(() -> new FriendRequestException("no friend requests between users")) ;
     }
+
 
     private void saveAcceptedFriendRequest(User sender, User receiver) {
         FriendRequest newFriendRequest = new FriendRequest();
@@ -184,6 +160,14 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     private void validateNoExistingFriendRequest(String emailSender, String emailReceiver) {
         if (Boolean.TRUE.equals(existFriendRequestByStatus(emailSender, emailReceiver))) {
             throw new FriendRequestException("A friend request from this sender to this receiver already exists.");
+        }
+    }
+    private void checkArgumentsNotNull(String email,Principal principal){
+        if (email == null) {
+            throw new IllegalArgumentException("Either sender's email or receiver's email is null.");
+        }
+        if (email.equals(principal.getName())) {
+            throw new IllegalArgumentException("Sender's email and receiver's email are the same. A user cannot send a friend request to themselves.");
         }
     }
 
