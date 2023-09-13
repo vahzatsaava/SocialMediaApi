@@ -7,11 +7,11 @@ public interface FriendRequestService {
 
     void sendFriendRequestAndSubscribe(Principal principal, String emailReceiver);
 
-    void acceptFriendRequest(Long id);
+    void acceptFriendRequest(String senderRequestUser, Principal principal);
 
     void deleteFromFriends(Principal principal, String userToDeleteEmail);
 
-    void rejectFriendRequest(Long id);
+    void rejectFriendRequest(String senderRequestUser, Principal principal);
 
     Boolean existFriendRequestByStatus(String senderEmail, String receiverEmail);
 

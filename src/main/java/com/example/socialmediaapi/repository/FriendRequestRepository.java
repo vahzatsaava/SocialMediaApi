@@ -4,6 +4,8 @@ import com.example.socialmediaapi.model.FriendRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface FriendRequestRepository extends JpaRepository<FriendRequest, Long> {
 
@@ -11,5 +13,6 @@ public interface FriendRequestRepository extends JpaRepository<FriendRequest, Lo
 
     void deleteBySenderUserEmailOrReceiverUserEmail(String senderUserEmail, String userToDeleteEmail);
 
-    FriendRequest findBySenderUserEmailAndReceiverUserEmail(String senderUserEmail, String userToDeleteEmail);
+    Optional<FriendRequest> findBySenderUserEmailAndReceiverUserEmail(String senderUserEmail, String userToDeleteEmail);
+
 }

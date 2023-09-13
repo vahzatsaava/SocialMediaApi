@@ -2,7 +2,7 @@ version: '3'
 
 services:
 
-  postgres-user:
+  postgres-post:
     container_name: postgres-post
     image: postgres
     environment:
@@ -11,7 +11,7 @@ services:
       POSTGRES_DB: user-post
       PGDATA: /data/PostTestApi
     volumes:
-      - postgres:/data/postgres
+      - postgres-post:/data/postgres
     ports:
       - "5470:5432"
     restart: unless-stopped
@@ -19,14 +19,8 @@ services:
       - app
 
 volumes:
-  postgres:
+  postgres-post:
     external: true
 networks:
   app:
     driver: bridge
-
-
-
-
-
-
