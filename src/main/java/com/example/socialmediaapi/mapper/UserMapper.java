@@ -16,7 +16,7 @@ public interface UserMapper {
     User toEntity(UserDto userDto);
 
     default User signUpToUser(SignUpDto signUpDto) {
-        return User.builder().username(signUpDto.getFirstName())
+        return User.builder()
                 .email(signUpDto.getEmail())
                 .password(signUpDto.getPassword())
                 .build();
