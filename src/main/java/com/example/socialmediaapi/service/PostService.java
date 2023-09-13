@@ -1,14 +1,17 @@
 package com.example.socialmediaapi.service;
 
 import com.example.socialmediaapi.dto.PostDto;
-import org.springframework.web.multipart.MultipartFile;
+import com.example.socialmediaapi.dto.post.PostInputDto;
+import com.example.socialmediaapi.model.Post;
 
 import java.security.Principal;
 
 public interface PostService {
-    PostDto createPost (String title, String text,MultipartFile image, Principal emailTarget);
-    PostDto updatePost (String title, String text, MultipartFile image, Long postId,Principal principal);
+    PostDto createPost (PostInputDto postInputDto,Principal emailTarget);
+    PostDto updatePost (PostInputDto postInputDto,Principal principal);
     PostDto getPostByTitle(String title);
     void delete(Long id, Principal principal);
+    Post findById(Long id);
+
 
 }

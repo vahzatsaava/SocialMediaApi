@@ -16,9 +16,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class SignUpDto {
-    @NotBlank(message = "First name must not be blank")
-    @Size(min = 8, message = "First name must be at least 8 characters long")
-    private String firstName;
 
     @NotBlank(message = "Email must not be blank")
     @Email(message = "Invalid email format")

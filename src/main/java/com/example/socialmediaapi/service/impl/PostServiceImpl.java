@@ -1,29 +1,22 @@
 package com.example.socialmediaapi.service.impl;
 
-import com.example.socialmediaapi.dto.ImageDto;
 import com.example.socialmediaapi.dto.PostDto;
 import com.example.socialmediaapi.dto.UserDto;
 import com.example.socialmediaapi.dto.content.UserActivityFeedDto;
-import com.example.socialmediaapi.exceptions.InternalServerErrorException;
+import com.example.socialmediaapi.dto.post.PostInputDto;
 import com.example.socialmediaapi.exceptions.PostCreatException;
 import com.example.socialmediaapi.exceptions.UnauthorizedException;
-import com.example.socialmediaapi.mapper.ImageMapper;
 import com.example.socialmediaapi.mapper.PostMapper;
 import com.example.socialmediaapi.mapper.UserActivityFeedMapper;
 import com.example.socialmediaapi.mapper.UserMapper;
-import com.example.socialmediaapi.model.Image;
 import com.example.socialmediaapi.model.Post;
-import com.example.socialmediaapi.repository.ImageRepository;
 import com.example.socialmediaapi.repository.PostRepository;
 import com.example.socialmediaapi.service.*;
-import com.example.socialmediaapi.utils.PhotoValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -39,8 +32,6 @@ public class PostServiceImpl implements PostService {
     private final ActivityFeedService activityFeedService;
     private final SubscriptionService subscriptionService;
 
-    private final ImageService imageService;
-
 
     private final PostMapper postMapper;
     private final UserMapper userMapper;
@@ -48,18 +39,15 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public PostDto createPost(String title, String text, MultipartFile image, Principal emailTargetUser) {
-        if (title == null || emailTargetUser == null || text == null || image == null) {
-            throw new IllegalArgumentException("One or more required fields are null");
+    public PostDto createPost(PostInputDto postInputDto, Principal emailTargetUser) {
+        if (postInputDto == null) {
+            throw new IllegalArgumentException("postInputDto  are null");
         }
 
         UserDto userTarget = userService.findByEmail(emailTargetUser.getName());
-        Image imageEntity = imageService.saveImage(image);
 
-        Post post = createPostEntity(userTarget, title, text, imageEntity);
+        Post post = createPostEntity(userTarget, postInputDto.getTitle(), postInputDto.getText());
         Post postSaved = postRepository.save(post);
-
-        imageEntity.setPost(postSaved);
 
         createActivityFeeds(emailTargetUser.getName(), postSaved);
 
@@ -69,26 +57,19 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public PostDto updatePost(String title, String text, MultipartFile image, Long postId, Principal principal) {
-        if (title == null || text == null || image == null) {
-            throw new IllegalArgumentException("One or more required fields are null");
+    public PostDto updatePost(PostInputDto postInputDto, Principal principal) {
+        if (postInputDto == null ) {
+            throw new IllegalArgumentException("postInputDto is null");
         }
-        Image imageEntity = imageService.saveImage(image);
 
-        log.info("try to find post by id ");
-        Post postById = findById(postId);
-
-        log.info("!!" + principal.getName());
+        Post postById = findById(postInputDto.getId());
 
         if (!postById.getUser().getEmail().equals(principal.getName())) {
             throw new UnauthorizedException("You are not authorized to delete this post");
         }
 
-        log.info("Update our post ");
+        updatePostFields(postById, postInputDto.getTitle(), postInputDto.getText());
 
-        updatePostFields(postById, title, text, imageEntity);
-
-        imageEntity.setPost(postById);
 
         return postMapper.toDto(postById);
     }
@@ -99,7 +80,6 @@ public class PostServiceImpl implements PostService {
         if (title == null) {
             throw new IllegalArgumentException("title is null getPostByTitle is canceled");
         }
-        log.info("try to find post by title ");
         Post post = postRepository.findByTitle(title)
                 .orElseThrow(() -> new PostCreatException("Post with title " + title + " not found"));
 
@@ -118,25 +98,24 @@ public class PostServiceImpl implements PostService {
             throw new UnauthorizedException("You are not authorized to delete this post");
         }
 
-        log.info("delete our post by id");
         postRepository.delete(post);
 
-        log.info("delete all activities with this post");
         activityFeedService.deleteActivityFeedByPostId(id);
     }
 
-    private Post findById(Long id) {
+    @Override
+    @Transactional(readOnly = true)
+    public Post findById(Long id) {
         return postRepository.findById(id)
                 .orElseThrow(() -> new PostCreatException("Post with id " + id + " not found"));
     }
 
-    private Post createPostEntity(UserDto userTarget, String title, String text, Image imageEntity) {
+    private Post createPostEntity(UserDto userTarget, String title, String text) {
         Post post = new Post();
         post.setUser(userMapper.toEntity(userTarget));
         post.setTitle(title);
         post.setText(text);
         post.setTimestamp(LocalDateTime.now());
-        post.setImages(List.of(imageEntity));
 
         return post;
     }
@@ -150,15 +129,10 @@ public class PostServiceImpl implements PostService {
         });
     }
 
-    private void updatePostFields(Post postById, String title, String text, Image imageEntity) {
+    private void updatePostFields(Post postById, String title, String text) {
         postById.setText(text);
         postById.setTitle(title);
         postById.setTimestamp(LocalDateTime.now());
 
-        if (postById.getImages() == null) {
-            postById.setImages(List.of(imageEntity));
-        } else {
-            postById.getImages().add(imageEntity);
-        }
     }
 }
