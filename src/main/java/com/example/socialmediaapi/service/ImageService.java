@@ -1,8 +1,9 @@
 package com.example.socialmediaapi.service;
 
-import com.example.socialmediaapi.model.Image;
+import com.example.socialmediaapi.dto.ImageDto;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface ImageService {
-    Image saveImage(MultipartFile image);
+    ImageDto addPicture(MultipartFile image, Long postId);
+    ImageDto updatePicture(MultipartFile image,Long imageId);
 }

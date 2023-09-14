@@ -37,15 +37,11 @@ public class MessageServiceImpl implements MessageService {
     @Transactional
     public void sendMessage(Principal principalSenderEmail, String receiverEmail, String content) {
 
-        if (receiverEmail == null) {
-            throw new IllegalArgumentException ("receiverEmail is null");
-        }
+        checkIsInputValuesNull(principalSenderEmail,receiverEmail);
         if (content == null) {
             throw new IllegalArgumentException ("content is null");
         }
-        if (Boolean.FALSE.equals(friendShipService.isFriends(principalSenderEmail.getName(), receiverEmail))) {
-            throw new MessageSendException("Users with emails " + principalSenderEmail + " and " + receiverEmail + " are not friends");
-        }
+
 
         UserDto senderUser = userService.findByEmail(principalSenderEmail.getName());
         UserDto receiverUser = userService.findByEmail(receiverEmail);
@@ -63,12 +59,7 @@ public class MessageServiceImpl implements MessageService {
     @Transactional(readOnly = true)
     public List<ContentChatFriendsDto> getChatBetweenUsers(Principal principal, String emailReceiver) {
 
-        if (emailReceiver == null) {
-            throw new IllegalArgumentException ("emailReceiver is null");
-        }
-        if (Boolean.FALSE.equals(friendShipService.isFriends(principal.getName(), emailReceiver))) {
-            throw new IllegalArgumentException ("Users with emails " + principal.getName() + " and " + emailReceiver + " are not friends");
-        }
+        checkIsInputValuesNull(principal,emailReceiver);
 
         UserDto userDtoSender = userService.findByEmail(principal.getName());
         UserDto userDtoReceiver = userService.findByEmail(emailReceiver);
@@ -82,4 +73,20 @@ public class MessageServiceImpl implements MessageService {
                 .map(contentChatFriendsDtoMapper::toContentChat)
                 .toList();
     }
+
+
+    private void checkIsInputValuesNull(Principal principal,String emailReceiver){
+        if (emailReceiver == null) {
+            throw new IllegalArgumentException ("emailReceiver is null");
+        }
+        if (principal.getName().equals(emailReceiver)){
+            throw new MessageSendException("You cannot write message to yourself");
+        }
+        if (Boolean.FALSE.equals(friendShipService.isFriends(principal.getName(), emailReceiver))) {
+            throw new MessageSendException ("Users with emails " + principal.getName() + " and " + emailReceiver + " are not friends");
+        }
+
+    }
 }
+
+

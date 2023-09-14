@@ -60,19 +60,6 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    @Override
-    @Transactional(readOnly = true)
-    public UserDto getUserByEmail(String userEmail) {
-        if (userEmail == null) {
-            throw new IllegalArgumentException ("email is null check email value");
-        }
-        User user = userRepository.findUserByEmail(userEmail)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email - " + userEmail));
-        log.info(" !!!" + user.getSubscriptions());
-
-        return userMapper.toDto(user);
-    }
-
 
 
 }

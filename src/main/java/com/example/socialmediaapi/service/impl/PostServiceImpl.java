@@ -32,7 +32,6 @@ public class PostServiceImpl implements PostService {
     private final ActivityFeedService activityFeedService;
     private final SubscriptionService subscriptionService;
 
-
     private final PostMapper postMapper;
     private final UserMapper userMapper;
     private final UserActivityFeedMapper userActivityFeedMapper;
@@ -43,12 +42,9 @@ public class PostServiceImpl implements PostService {
         if (postInputDto == null) {
             throw new IllegalArgumentException("postInputDto  are null");
         }
-
         UserDto userTarget = userService.findByEmail(emailTargetUser.getName());
-
         Post post = createPostEntity(userTarget, postInputDto.getTitle(), postInputDto.getText());
         Post postSaved = postRepository.save(post);
-
         createActivityFeeds(emailTargetUser.getName(), postSaved);
 
         return postMapper.toDto(postSaved);
@@ -65,11 +61,10 @@ public class PostServiceImpl implements PostService {
         Post postById = findById(postInputDto.getId());
 
         if (!postById.getUser().getEmail().equals(principal.getName())) {
-            throw new UnauthorizedException("You are not authorized to delete this post");
+            throw new UnauthorizedException("You are not authorized to update this post");
         }
 
         updatePostFields(postById, postInputDto.getTitle(), postInputDto.getText());
-
 
         return postMapper.toDto(postById);
     }
@@ -82,7 +77,6 @@ public class PostServiceImpl implements PostService {
         }
         Post post = postRepository.findByTitle(title)
                 .orElseThrow(() -> new PostCreatException("Post with title " + title + " not found"));
-
         return postMapper.toDto(post);
     }
 
@@ -99,7 +93,6 @@ public class PostServiceImpl implements PostService {
         }
 
         postRepository.delete(post);
-
         activityFeedService.deleteActivityFeedByPostId(id);
     }
 

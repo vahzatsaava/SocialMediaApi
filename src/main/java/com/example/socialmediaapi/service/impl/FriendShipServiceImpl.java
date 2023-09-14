@@ -24,7 +24,6 @@ public class FriendShipServiceImpl implements FriendShipService {
         if (friendship == null){
             throw new IllegalArgumentException ("this friendship values is null" );
         }
-        log.info("try to save friendship");
         FriendShip savedFriendShip = friendShipRepository.save(friendShipMapper.toFriendShipEntity(friendship));
 
         return friendShipMapper.toFriendShipDto(savedFriendShip);
