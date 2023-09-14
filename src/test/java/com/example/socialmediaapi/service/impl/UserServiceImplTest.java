@@ -84,7 +84,7 @@ class UserServiceImplTest {
         when(userRepository.findUserByEmail(userEmail)).thenReturn(Optional.of(user));
         when(userMapper.toDto(user)).thenReturn(new UserDto());
 
-        UserDto result = userService.getUserByEmail(userEmail);
+        UserDto result = userService.findByEmail(userEmail);
 
         assertNotNull(result);
         verify(userRepository, times(1)).findUserByEmail(userEmail);
